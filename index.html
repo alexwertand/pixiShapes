@@ -1,0 +1,57 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="assets/css/normalize.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <title>PIXI</title>
+</head>
+<body>
+
+    <div class="container flex flex-center">
+        <div class="wrapper">
+            <div class="info-box flex">
+                <div class="count-shapes">
+                    <span class="head">Number of current shapes:</span>
+
+                    <span class="count-shapes__count">0</span>
+                </div>
+
+                <div class="area-shapes">
+                    <span class="head">Surface area occupied by shapes:</span>
+                    
+                    <span class="area-shapes__area">0</span>
+                </div>
+            </div>
+
+            <div class="canvas-box">
+                <canvas id="scene"></canvas>
+            </div>
+
+            <div class="control-box flex">
+                <div class="amount-box flex flex-center">
+                    <div class="head">Number of shapes per sec</div>
+
+                    <div class="amount-box__btn-box">
+                        <button id="increase-amount" class="btn btn-increase" type="button"></button>
+
+                        <button id="decrease-amount" class="btn btn-decrease" type="button"></button>
+                    </div>
+                </div>
+
+                <div class="gravity-box flex flex-center">
+                    <div class="head">Number of shapes per sec</div>
+                
+                    <div class="gravity-box__btn-box">
+                        <button id="increase-gravity" class="btn btn-increase" type="button"></button>
+                
+                        <button id="decrease-gravity" class="btn btn-decrease" type="button"></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/pixi.min.js"></script>
+    <script src="assets/js/index.js"></script>
+</body></html>
