@@ -36,12 +36,12 @@ function init() {
         ticker = new PIXI.Ticker(),
         sceneWidth = scene.offsetWidth,
         sceneHeight = scene.offsetHeight,
-        zero_X_Axis = Math.ceil(scene.getBoundingClientRect().left),
-        zero_Y_Axis = Math.ceil(scene.getBoundingClientRect().top),
+        startXAxis = Math.ceil(scene.getBoundingClientRect().left),
+        startYAxis = Math.ceil(scene.getBoundingClientRect().top),
         w = window,
         w_w = w.innerWidth,
         w_h = w.innerHeight,
-        shapesArr = [],
+        animatedShapesArr = [],
         gravityValue = 1;
 
     //console.log(sceneWidth, sceneHeight);
@@ -61,24 +61,39 @@ function init() {
         return rgb2hex('rgb(' + getRandomInt(256) + ',' + getRandomInt(256) + ',' + getRandomInt(256) + ')');
     }
 
-    function BaseShape(lineStyleWidth, lineStyleColor, fillColor, x, y, dx, dy) {
-        this.lineStyleWidth = lineStyleWidth;
-        this.lineStyleColor = lineStyleColor;
-        this.fillColor = fillColor;
+    function BaseShape(lineStyleWidth, lineStyleColor, fillColor, x, y) {
+        this.lineStyleWidth = lineStyleWidth || 2;
+        this.lineStyleColor = lineStyleColor || getRandonColor();
+        this.fillColor = fillColor || getRandonColor();
         this.x = x;
         this.y = y;
-        this.dx = dx;
-        this.dy = dy;
+        this.trackArr = [];
     }
 
-    function Circle(lineStyleWidth, lineStyleColor, fillColor, x, y, dx, dy, radius) {
-        BaseShape.call(this, lineStyleWidth, lineStyleColor, fillColor, x, y, dx, dy);
+    const Shapes = {
+        Circle: function (lineStyleWidth, lineStyleColor, fillColor, x, y, radius) {
+            BaseShape.call(this, lineStyleWidth, lineStyleColor, fillColor, x, y);
 
-        this.radius = radius;
-    }
+            this.radius = radius || 50;
+        },
+        Ellipse: function (lineStyleWidth, lineStyleColor, fillColor, x, y, width, height) {
+            BaseShape.call(this, lineStyleWidth, lineStyleColor, fillColor, x, y);
 
-    Circle.prototype = {
-        constructor: Circle,
+            this.width = width || 50;
+            this.height = height || 100;
+        },
+        Rectangle: function (lineStyleWidth, lineStyleColor, fillColor, x, y, width, height) {
+            BaseShape.call(this, lineStyleWidth, lineStyleColor, fillColor, x, y);
+
+            this.width = width || 100;
+            this.height = height || 100;
+        }
+    };
+
+    const ShapesValuesArr = Object.values(Shapes);
+
+    Shapes.Circle.prototype = {
+        constructor: this,
         draw: function () {
             graphic.lineStyle(this.lineStyleWidth, this.lineStyleColor);
             graphic.beginFill(this.fillColor);
@@ -90,26 +105,14 @@ function init() {
                 this.y = -(this.radius + this.lineStyleWidth);
             }
 
-            this.y += this.dy;
+            this.y += gravityValue;
 
             this.draw();
         },
     };
 
-    //graphic.lineStyle(2, rgb2hex('rgb(0, 200, 255)'));
-    //graphic.beginFill(rgb2hex('rgb(255, 0, 0)'));
-    //graphic.drawEllipse(202, 102, 200, 100);
-    //graphic.endFill();
-
-    function Ellipse(lineStyleWidth, lineStyleColor, fillColor, x, y, dx, dy, width, height) {
-        BaseShape.call(this, lineStyleWidth, lineStyleColor, fillColor, x, y, dx, dy);
-
-        this.width = width;
-        this.height = height;
-    }
-
-    Ellipse.prototype = {
-        constructor: Ellipse,
+    Shapes.Ellipse.prototype = {
+        constructor: this,
         draw: function () {
             graphic.lineStyle(this.lineStyleWidth, this.lineStyleColor);
             graphic.beginFill(this.fillColor);
@@ -121,21 +124,14 @@ function init() {
                 this.y = -(this.height + this.lineStyleWidth);
             }
 
-            this.y += this.dy;
+            this.y += gravityValue;
 
             this.draw();
         },
     };
 
-    function Rectangle(lineStyleWidth, lineStyleColor, fillColor, x, y, dx, dy, width, height) {
-        BaseShape.call(this, lineStyleWidth, lineStyleColor, fillColor, x, y, dx, dy);
-
-        this.width = width;
-        this.height = height;
-    }
-
-    Rectangle.prototype = {
-        constructor: Rectangle,
+    Shapes.Rectangle.prototype = {
+        constructor: this,
         draw: function () {
             graphic.lineStyle(this.lineStyleWidth, this.lineStyleColor);
             graphic.beginFill(this.fillColor);
@@ -145,60 +141,93 @@ function init() {
         update: function () {
             if (this.y > sceneHeight) {
                 this.y = -(this.height + this.lineStyleWidth);
+
+                this.trackArr = [];
             }
 
-            this.y += this.dy;
+            this.y += gravityValue;
+
+            this.trackArr.push(this.y);
+
+            //console.log(this.trackArr);
 
             this.draw();
         },
     };
 
-    // graphic.drawPolygon([
-    //     new PIXI.Point(100, 100), 
-    //     new PIXI.Point(100, 200), 
-    //     new PIXI.Point(200, 200)
-    // ]);
+    /* Shapes.Triangle.prototype = {
+        constructor: this,
+        draw: function () {
+            graphic.lineStyle(this.lineStyleWidth, this.lineStyleColor);
+            graphic.beginFill(this.fillColor);
+            //graphic.drawRect(this.x, this.y, this.width, this.height);
+            graphic.drawPolygon([
+                new PIXI.Point(this.A_X, this.A_Y),
+                new PIXI.Point(this.B_X, this.B_Y),
+                new PIXI.Point(this.C_X, this.C_Y),
+            ]);
+            graphic.closePath();
+            graphic.endFill();
+        },
+        update: function () {
+            if (this.y + this.height > sceneHeight) {
+                this.y = -(this.height + this.lineStyleWidth);
+            }
 
+            this.y += this.dy;
+            this.height += this.dy;
 
-    function drawShapes() {
-        shapesArr = [
-            new Circle(
+            this.draw();
+        },
+    }; */
+
+    function initShapes() {
+        animatedShapesArr = [
+            new Shapes.Circle(
                 2,
                 getRandonColor(),
                 getRandonColor(),
                 (52 + position(sceneWidth - 50 - 50 - 2).x),
                 (52 + position(sceneHeight - 50 - 50 - 2).y),
-                1, 1, 50),
-            new Ellipse(
+                50),
+            new Shapes.Ellipse(
                 2,
                 getRandonColor(),
                 getRandonColor(),
                 (102 + position(sceneWidth - 100 - 100 - 2).x),
                 (52 + position(sceneHeight - 50 - 50 - 2).y),
-                1, 1, 100, 50),
-            new Rectangle(
+                100, 50),
+            new Shapes.Rectangle(
                 2,
                 getRandonColor(),
                 getRandonColor(),
                 (2 + position(sceneWidth - 100 - 2).x),
                 (2 + position(sceneHeight - 70 - 2).y),
-                1, 1, 100, 70),
+                100, 70),
         ];
     }
 
-    function handlerOfShapes(shapesArr, methodName) {
-        for (var i = 0, len = shapesArr.length; i < len; i++) {
-            shapesArr[i][methodName]();
+    function handlerOfShapes(arr, methodName) {
+        for (var i = 0, len = arr.length; i < len; i++) {
+            arr[i][methodName]();
         }
+    }
+
+    function addShapes(x, y) {
+        var randomShape = new ShapesValuesArr[getRandomInt(ShapesValuesArr.length)](null, null, null, x, y);
+
+        animatedShapesArr.push(randomShape);
+
+        console.log(animatedShapesArr);
+
+        handlerOfShapes([randomShape], 'draw');
     }
 
     app.stage.addChild(graphic);
 
-    drawShapes(shapesArr);
-
-    console.log(shapesArr);
+    initShapes();
     
-    handlerOfShapes(shapesArr, 'draw');
+    handlerOfShapes(animatedShapesArr, 'draw');
 
     ticker.add(animate);
     ticker.start();
@@ -206,14 +235,28 @@ function init() {
     function animate() {
         graphic.clear();
 
-        handlerOfShapes(shapesArr, 'update');
+        handlerOfShapes(animatedShapesArr, 'update');
+
+        //console.log(animatedShapesArr);
     }
 
     window.addEventListener('click', function(event) {
         if (event.target.id == 'scene') {
-            
+            addShapes(event.x - startXAxis, event.y - startYAxis);
+
+            //console.log(event.x, startXAxis);
         }
-        console.log();
+        
+    });
+
+    document.getElementById('increase-gravity').addEventListener('click', function (event) {
+        gravityValue += 1;
+    });
+
+    document.getElementById('decrease-gravity').addEventListener('click', function (event) {
+        if (gravityValue > 1) {
+            gravityValue -= 1;
+        }
     });
 }
 
