@@ -65,8 +65,8 @@ function init() {
         this.lineStyleWidth = lineStyleWidth || 2;
         this.lineStyleColor = lineStyleColor || getRandonColor();
         this.fillColor = fillColor || getRandonColor();
-        this.x = x;
-        this.y = y;
+        this.x = x || 100;
+        this.y = y || 100;
         this.trackArr = [];
     }
 
@@ -87,6 +87,14 @@ function init() {
 
             this.width = width || 100;
             this.height = height || 100;
+        },
+        Triangle: function (lineStyleWidth, lineStyleColor, fillColor, x, y) {
+            BaseShape.call(this, lineStyleWidth, lineStyleColor, fillColor, x, y);
+
+            this.B_X = this.x - 75;
+            this.B_Y = this.y + 150;
+            this.C_X = this.x + 75;
+            this.C_Y = this.y + 150;
         }
     };
 
@@ -155,14 +163,13 @@ function init() {
         },
     };
 
-    /* Shapes.Triangle.prototype = {
+    Shapes.Triangle.prototype = {
         constructor: this,
         draw: function () {
             graphic.lineStyle(this.lineStyleWidth, this.lineStyleColor);
             graphic.beginFill(this.fillColor);
-            //graphic.drawRect(this.x, this.y, this.width, this.height);
             graphic.drawPolygon([
-                new PIXI.Point(this.A_X, this.A_Y),
+                new PIXI.Point(this.x, this.y),
                 new PIXI.Point(this.B_X, this.B_Y),
                 new PIXI.Point(this.C_X, this.C_Y),
             ]);
@@ -170,16 +177,19 @@ function init() {
             graphic.endFill();
         },
         update: function () {
-            if (this.y + this.height > sceneHeight) {
-                this.y = -(this.height + this.lineStyleWidth);
+            if (this.B_Y + this.lineStyleWidth > sceneHeight) {
+                this.y = this.y - sceneHeight;
+                this.B_Y = -this.lineStyleWidth;
+                this.C_Y = -this.lineStyleWidth;
             }
 
-            this.y += this.dy;
-            this.height += this.dy;
+            this.y += gravityValue;
+            this.B_Y += gravityValue;
+            this.C_Y += gravityValue;
 
             this.draw();
         },
-    }; */
+    };
 
     function initShapes() {
         animatedShapesArr = [
@@ -204,6 +214,7 @@ function init() {
                 (2 + position(sceneWidth - 100 - 2).x),
                 (2 + position(sceneHeight - 70 - 2).y),
                 100, 70),
+            new Shapes.Triangle(),
         ];
     }
 
