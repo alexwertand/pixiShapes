@@ -95,6 +95,30 @@ function init() {
             this.B_Y = this.y + 150;
             this.C_X = this.x + 75;
             this.C_Y = this.y + 150;
+        },
+        /* Pentagon: function (lineStyleWidth, lineStyleColor, fillColor, x, y) {
+            BaseShape.call(this, lineStyleWidth, lineStyleColor, fillColor, x, y);
+
+            this.B_X = this.x + 25;
+            this.B_Y = this.y + 25;
+            this.C_X = this.x + 75;
+            this.C_Y = this.y + 150;
+        }, */
+        Hexagon: function (lineStyleWidth, lineStyleColor, fillColor, x, y) {
+            BaseShape.call(this, lineStyleWidth, lineStyleColor, fillColor, x, y);
+
+            //this.height = 70
+
+            this.B_X = this.x + 15;
+            this.B_Y = this.y + 15;
+            this.C_X = this.B_X + 15;
+            this.C_Y = this.B_Y + 35;
+            this.D_X = this.B_X;
+            this.D_Y = this.B_Y + 70;
+            this.E_X = this.x;
+            this.E_Y = this.y + 70;
+            this.F_X = this.x - 15;
+            this.F_Y = this.y + 35;
         }
     };
 
@@ -191,22 +215,59 @@ function init() {
         },
     };
 
+    Shapes.Hexagon.prototype = {
+        constructor: this,
+        draw: function () {
+            graphic.lineStyle(this.lineStyleWidth, this.lineStyleColor);
+            graphic.beginFill(this.fillColor);
+            graphic.drawPolygon([
+                new PIXI.Point(this.x, this.y),
+                new PIXI.Point(this.B_X, this.B_Y),
+                new PIXI.Point(this.C_X, this.C_Y),
+                new PIXI.Point(this.D_X, this.D_Y),
+                new PIXI.Point(this.E_X, this.E_Y),
+                new PIXI.Point(this.F_X, this.F_Y),
+            ]);
+            graphic.closePath();
+            graphic.endFill();
+        },
+        update: function () {
+            if (this.D_Y + this.lineStyleWidth > sceneHeight) {
+                this.y = this.y - sceneHeight;
+                this.B_Y = this.y + 15;
+                this.C_Y = this.B_Y + 35;
+                this.D_Y = this.B_Y + 70;
+                this.E_Y = this.y + 70;
+                this.F_Y = this.y + 35;
+            }
+
+            this.y += gravityValue;
+            this.B_Y += gravityValue;
+            this.C_Y += gravityValue;
+            this.D_Y += gravityValue;
+            this.E_Y += gravityValue;
+            this.F_Y += gravityValue;
+
+            this.draw();
+        },
+    };
+
     function initShapes() {
         animatedShapesArr = [
             new Shapes.Circle(
                 2,
                 getRandonColor(),
                 getRandonColor(),
-                (52 + position(sceneWidth - 50 - 50 - 2).x),
-                (52 + position(sceneHeight - 50 - 50 - 2).y),
-                50),
+                (32 + position(sceneWidth - 30 - 30 - 2).x),
+                (32 + position(sceneHeight - 30 - 30 - 2).y),
+                30),
             new Shapes.Ellipse(
                 2,
                 getRandonColor(),
                 getRandonColor(),
-                (102 + position(sceneWidth - 100 - 100 - 2).x),
-                (52 + position(sceneHeight - 50 - 50 - 2).y),
-                100, 50),
+                (102 + position(sceneWidth - 70 - 70 - 2).x),
+                (32 + position(sceneHeight - 30 - 30 - 2).y),
+                30, 70),
             new Shapes.Rectangle(
                 2,
                 getRandonColor(),
@@ -215,6 +276,7 @@ function init() {
                 (2 + position(sceneHeight - 70 - 2).y),
                 100, 70),
             new Shapes.Triangle(),
+            new Shapes.Hexagon(),
         ];
     }
 
