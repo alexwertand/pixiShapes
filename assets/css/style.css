@@ -16,6 +16,14 @@
     align-items: center;
 }
 
+.event-none {
+    pointer-events: none;
+}
+
+.muted {
+    opacity: 0.5;
+}
+
 .head {
     margin-right: 10px;
     color: blue;
@@ -51,8 +59,7 @@
     padding: 10px 15px;
 }
 
-.count-shapes__count,
-.area-shapes__area {
+.orange-red-color {
     color: orangered;
 }
 

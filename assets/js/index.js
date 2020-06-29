@@ -34,6 +34,12 @@ function init() {
         }),
         graphic = new PIXI.Graphics(),
         ticker = new PIXI.Ticker(),
+        decreaseShapesBtn = document.querySelector('#decrease-amount'),
+        increaseShapesBtn = document.querySelector('#increase-amount'),
+        increaseGravityBtn = document.querySelector('#increase-gravity'),
+        descreaseGravityBtn = document.querySelector('#decrease-gravity'),
+        shapesAmountBox = document.querySelector('.shapes-amount-box'),
+        gravityAmountBox = document.querySelector('.gravity-amount-box'),
         sceneWidth = scene.offsetWidth,
         sceneHeight = scene.offsetHeight,
         startXAxis = Math.ceil(scene.getBoundingClientRect().left),
@@ -43,6 +49,10 @@ function init() {
         w_h = w.innerHeight,
         animatedShapesArr = [],
         gravityValue = 1;
+
+    gravityAmountBox.innerText = gravityValue;
+
+    app.stage.addChild(graphic);
 
     //console.log(sceneWidth, sceneHeight);
 
@@ -96,14 +106,18 @@ function init() {
             this.C_X = this.x + 75;
             this.C_Y = this.y + 150;
         },
-        /* Pentagon: function (lineStyleWidth, lineStyleColor, fillColor, x, y) {
+        Pentagon: function (lineStyleWidth, lineStyleColor, fillColor, x, y) {
             BaseShape.call(this, lineStyleWidth, lineStyleColor, fillColor, x, y);
 
-            this.B_X = this.x + 25;
-            this.B_Y = this.y + 25;
-            this.C_X = this.x + 75;
-            this.C_Y = this.y + 150;
-        }, */
+            this.B_X = this.x + 50;
+            this.B_Y = this.y + 50;
+            this.C_X = this.B_X;
+            this.C_Y = this.B_Y + 100;
+            this.E_X = this.x - 50;
+            this.E_Y = this.y + 50;
+            this.D_X = this.E_X;
+            this.D_Y = this.E_Y + 100;
+        },
         Hexagon: function (lineStyleWidth, lineStyleColor, fillColor, x, y) {
             BaseShape.call(this, lineStyleWidth, lineStyleColor, fillColor, x, y);
 
@@ -215,6 +229,40 @@ function init() {
         },
     };
 
+    Shapes.Pentagon.prototype = {
+        constructor: this,
+        draw: function () {
+            graphic.lineStyle(this.lineStyleWidth, this.lineStyleColor);
+            graphic.beginFill(this.fillColor);
+            graphic.drawPolygon([
+                new PIXI.Point(this.x, this.y),
+                new PIXI.Point(this.B_X, this.B_Y),
+                new PIXI.Point(this.C_X, this.C_Y),
+                new PIXI.Point(this.D_X, this.D_Y),
+                new PIXI.Point(this.E_X, this.E_Y),
+            ]);
+            graphic.closePath();
+            graphic.endFill();
+        },
+        update: function () {
+            if (this.D_Y + this.lineStyleWidth > sceneHeight) {
+                this.y = this.y - sceneHeight;
+                this.B_Y = this.y + 50;
+                this.C_Y = this.B_Y + 100;
+                this.E_Y = this.y + 50;
+                this.D_Y = this.E_Y + 100;
+            }
+
+            this.y += gravityValue;
+            this.B_Y += gravityValue;
+            this.C_Y += gravityValue;
+            this.D_Y += gravityValue;
+            this.E_Y += gravityValue;
+
+            this.draw();
+        },
+    };
+
     Shapes.Hexagon.prototype = {
         constructor: this,
         draw: function () {
@@ -276,6 +324,7 @@ function init() {
                 (2 + position(sceneHeight - 70 - 2).y),
                 100, 70),
             new Shapes.Triangle(),
+            new Shapes.Pentagon(),
             new Shapes.Hexagon(),
         ];
     }
@@ -287,18 +336,23 @@ function init() {
     }
 
     function addShapes(x, y) {
-        var randomShape = new ShapesValuesArr[getRandomInt(ShapesValuesArr.length)](null, null, null, x, y);
+
+        console.log(x, y);
+
+        var randomShape = new ShapesValuesArr[getRandomInt(ShapesValuesArr.length)](null, null, null, x || 200, y || 400);
 
         animatedShapesArr.push(randomShape);
+
+        shapesAmountBox.innerText = animatedShapesArr.length;
 
         console.log(animatedShapesArr);
 
         handlerOfShapes([randomShape], 'draw');
     }
 
-    app.stage.addChild(graphic);
-
     initShapes();
+
+    shapesAmountBox.innerText = animatedShapesArr.length;
     
     handlerOfShapes(animatedShapesArr, 'draw');
 
@@ -322,15 +376,39 @@ function init() {
         
     });
 
-    document.getElementById('increase-gravity').addEventListener('click', function (event) {
+    increaseGravityBtn.addEventListener('click', function (event) {
+        if (gravityValue == 1) descreaseGravityBtn.classList.remove('event-none', 'muted');
+
         gravityValue += 1;
+        gravityAmountBox.innerText = gravityValue;
     });
 
-    document.getElementById('decrease-gravity').addEventListener('click', function (event) {
+    descreaseGravityBtn.addEventListener('click', function (event) {
         if (gravityValue > 1) {
             gravityValue -= 1;
+            gravityAmountBox.innerText = gravityValue;
         }
+
+        if (gravityValue == 1) event.target.classList.add('event-none', 'muted');
     });
+
+    function incrementShapes(event) {
+        if (animatedShapesArr.length == 0) decreaseShapesBtn.classList.remove('event-none', 'muted');
+
+        addShapes();
+    }
+
+    function decrementShapes(event) {
+        if (animatedShapesArr.length) {
+            animatedShapesArr.splice(getRandomInt(animatedShapesArr.length), 1);
+            shapesAmountBox.innerText = animatedShapesArr.length;
+        }
+
+        if (animatedShapesArr.length == 0) event.target.classList.add('event-none', 'muted');
+    }
+
+    increaseShapesBtn.addEventListener('click', incrementShapes);
+    decreaseShapesBtn.addEventListener('click', decrementShapes);
 }
 
 
