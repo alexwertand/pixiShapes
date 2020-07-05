@@ -26,6 +26,21 @@ function init() {
         return Math.floor(Math.random() * Math.floor(max));
     }
 
+    function position(val) {
+        return {
+            x: getRandomInt(val + 1),
+            y: getRandomInt(val + 1)
+        };
+    }
+
+    function getRandonColor(alpha) {
+        if (alpha) return rgb2hex('rgba(' + getRandomInt(256) + ',' + getRandomInt(256) + ',' + getRandomInt(256) + ',' + alpha + ')');
+        
+        return rgb2hex('rgb(' + getRandomInt(256) + ',' + getRandomInt(256) + ',' + getRandomInt(256) + ')');
+    }
+
+    console.log(getRandonColor(50));
+
     var scene = document.querySelector('#scene'),
         app = new PIXI.Application({
             view: scene,
@@ -49,62 +64,69 @@ function init() {
         w_h = w.innerHeight,
         animatedShapesArr = [],
         gravityValue = 1;
+    
+    app.stage.addChild(graphic);
 
     gravityAmountBox.innerText = gravityValue;
 
-    app.stage.addChild(graphic);
+    graphic.interactive = true;
+    graphic.buttonMode = true;
 
-    //console.log(sceneWidth, sceneHeight);
+    var shapeClickEvent = new CustomEvent('shapeClick', {
+        detail:
+            {
+                x: null,
+                y: null
+            }
+    });
 
-    function position(val) {
-        return {
-            x: getRandomInt(val + 1),
-            y: getRandomInt(val + 1)
-        };
-    }
+    graphic.click = function (e) {
+        shapeClickEvent.detail.x = e.data.global.x;
+        shapeClickEvent.detail.y = e.data.global.y;
+        document.dispatchEvent(shapeClickEvent);
 
-    function getRandonColor(alpha) {
-        if (alpha) {
-            return;
-        }
+        //console.log(e);
+    };
 
-        return rgb2hex('rgb(' + getRandomInt(256) + ',' + getRandomInt(256) + ',' + getRandomInt(256) + ')');
-    }
-
-    function BaseShape(lineStyleWidth, lineStyleColor, fillColor, x, y) {
+    function BaseShape(animatedIndex, lineStyleWidth, lineStyleColor, fillColor, x, y) {
         this.lineStyleWidth = lineStyleWidth || 2;
         this.lineStyleColor = lineStyleColor || getRandonColor();
         this.fillColor = fillColor || getRandonColor();
         this.x = x || 100;
         this.y = y || 100;
-        this.trackArr = [];
+        this.animatedIndex = animatedIndex;
+        this.triggerShapeEvent = false;
     }
 
-    const Shapes = {
-        Circle: function (lineStyleWidth, lineStyleColor, fillColor, x, y, radius) {
-            BaseShape.call(this, lineStyleWidth, lineStyleColor, fillColor, x, y);
+    var Shapes = {
+        Circle: function (animatedIndex, lineStyleWidth, lineStyleColor, fillColor, x, y, radius) {
+            BaseShape.call(this, animatedIndex, lineStyleWidth, lineStyleColor, fillColor, x, y);
 
             this.radius = radius || 50;
+            this.parentTypeShape = 'round';
+            this.typeShape = 'Circle';
         },
-        Ellipse: function (lineStyleWidth, lineStyleColor, fillColor, x, y, width, height) {
-            BaseShape.call(this, lineStyleWidth, lineStyleColor, fillColor, x, y);
+        Ellipse: function (animatedIndex, lineStyleWidth, lineStyleColor, fillColor, x, y, width, height) {
+            BaseShape.call(this, animatedIndex, lineStyleWidth, lineStyleColor, fillColor, x, y);
 
             this.width = width || 50;
             this.height = height || 100;
+            this.parentTypeShape = 'round';
+            this.typeShape = 'Ellipse';
         },
-        Rectangle: function (lineStyleWidth, lineStyleColor, fillColor, x, y, width, height) {
-            BaseShape.call(this, lineStyleWidth, lineStyleColor, fillColor, x, y);
+        Rectangle: function (animatedIndex, lineStyleWidth, lineStyleColor, fillColor, x, y, width, height) {
+            BaseShape.call(this, animatedIndex, lineStyleWidth, lineStyleColor, fillColor, x, y);
 
             this.width = width || 100;
             this.height = height || 100;
         },
-        Triangle: function (lineStyleWidth, lineStyleColor, fillColor, x, y) {
-            BaseShape.call(this, lineStyleWidth, lineStyleColor, fillColor, x, y);
+        Triangle: function (animatedIndex, lineStyleWidth, lineStyleColor, fillColor, x, y) {
+            BaseShape.call(this, animatedIndex, lineStyleWidth, lineStyleColor, fillColor, x, y);
 
             this.B_X = this.x - 75;
-            this.B_Y = this.y + 150;
+            this.B_Y = this.y + 100;
             this.C_X = this.x + 75;
-            this.C_Y = this.y + 150;
+            this.C_Y = this.y + 100;
         },
         Pentagon: function (lineStyleWidth, lineStyleColor, fillColor, x, y) {
             BaseShape.call(this, lineStyleWidth, lineStyleColor, fillColor, x, y);
@@ -136,15 +158,38 @@ function init() {
         }
     };
 
-    const ShapesValuesArr = Object.values(Shapes);
+    var typeShapesArr = Object.values(Shapes);
 
     Shapes.Circle.prototype = {
         constructor: this,
+        initCircle: function () {
+            return new PIXI.Circle(this.x, this.y, this.radius);
+        },
         draw: function () {
+            var circle = new PIXI.Circle(this.x, this.y, this.radius);
             graphic.lineStyle(this.lineStyleWidth, this.lineStyleColor);
             graphic.beginFill(this.fillColor);
-            graphic.drawCircle(this.x, this.y, this.radius);
+            graphic.drawShape(this.initCircle());
+            //graphic.hitArea = circle;
+            //graphic.drawCircle(this.x, this.y, this.radius);
             graphic.endFill();
+
+            //console.log(this.y);
+
+            if (!this.triggerShapeEvent) {
+                document.addEventListener('shapeClick', e => {
+                    console.log('shapeClick', this.initCircle().contains(e.detail.x, e.detail.y));
+
+                    console.log('circle', this.x, this.y);
+
+                    console.log('event', e.detail.x, e.detail.y);
+                });
+
+                this.triggerShapeEvent = true;
+            }
+        },
+        updateRunner: function (time) {
+            console.log('updateRunner');
         },
         update: function() {
             if (this.y > sceneHeight) {
@@ -159,11 +204,27 @@ function init() {
 
     Shapes.Ellipse.prototype = {
         constructor: this,
-        draw: function () {
+        initEllipse: function () {
+            return new PIXI.Ellipse(this.x, this.y, this.width, this.height);
+        },
+        draw: function() {
             graphic.lineStyle(this.lineStyleWidth, this.lineStyleColor);
             graphic.beginFill(this.fillColor);
-            graphic.drawEllipse(this.x, this.y, this.width, this.height);
+            graphic.drawShape(this.initEllipse());
+            //graphic.drawEllipse(this.x, this.y, this.width, this.height);
             graphic.endFill();
+
+            if (!this.triggerShapeEvent) {
+                document.addEventListener('shapeClick', e => {
+                    console.log('shapeClick', this.initEllipse().contains(e.detail.x, e.detail.y));
+
+                    console.log('circle', this.x, this.y);
+
+                    console.log('event', e.detail.x, e.detail.y);
+                });
+
+                this.triggerShapeEvent = true;
+            }
         },
         update: function () {
             if (this.y > sceneHeight) {
@@ -188,12 +249,12 @@ function init() {
             if (this.y > sceneHeight) {
                 this.y = -(this.height + this.lineStyleWidth);
 
-                this.trackArr = [];
+                //this.trackArr = [];
             }
 
             this.y += gravityValue;
 
-            this.trackArr.push(this.y);
+            //this.trackArr.push(this.y);
 
             //console.log(this.trackArr);
 
@@ -302,28 +363,10 @@ function init() {
 
     function initShapes() {
         animatedShapesArr = [
-            new Shapes.Circle(
-                2,
-                getRandonColor(),
-                getRandonColor(),
-                (32 + position(sceneWidth - 30 - 30 - 2).x),
-                (32 + position(sceneHeight - 30 - 30 - 2).y),
-                30),
-            new Shapes.Ellipse(
-                2,
-                getRandonColor(),
-                getRandonColor(),
-                (102 + position(sceneWidth - 70 - 70 - 2).x),
-                (32 + position(sceneHeight - 30 - 30 - 2).y),
-                30, 70),
-            new Shapes.Rectangle(
-                2,
-                getRandonColor(),
-                getRandonColor(),
-                (2 + position(sceneWidth - 100 - 2).x),
-                (2 + position(sceneHeight - 70 - 2).y),
-                100, 70),
-            new Shapes.Triangle(),
+            new Shapes.Circle(0, 2, getRandonColor(), getRandonColor(), 50, 50, 30),
+            new Shapes.Ellipse(1, 2, getRandonColor(), getRandonColor(), 200, 50, 70, 30),
+            new Shapes.Rectangle(2, 2, getRandonColor(), getRandonColor(), 300, 100, 100, 70),
+            new Shapes.Triangle(3, 2, getRandonColor(), getRandonColor(), 200, 200),
             new Shapes.Pentagon(),
             new Shapes.Hexagon(),
         ];
@@ -339,7 +382,7 @@ function init() {
 
         console.log(x, y);
 
-        var randomShape = new ShapesValuesArr[getRandomInt(ShapesValuesArr.length)](null, null, null, x || 200, y || 400);
+        var randomShape = new typeShapesArr[getRandomInt(typeShapesArr.length)](animatedShapesArr.length, 2, getRandonColor(), getRandonColor(), x, y);
 
         animatedShapesArr.push(randomShape);
 
@@ -352,9 +395,16 @@ function init() {
 
     initShapes();
 
+    /* console.log(animatedShapesArr[0]);
+
+    myGame.updateRunner.add(Shapes.Circle);
+
+    myGame.updateRunner.emit(); */
+
     shapesAmountBox.innerText = animatedShapesArr.length;
     
     handlerOfShapes(animatedShapesArr, 'draw');
+    handlerOfShapes([animatedShapesArr[0]], 'updateRunner');
 
     ticker.add(animate);
     ticker.start();
@@ -362,19 +412,21 @@ function init() {
     function animate() {
         graphic.clear();
 
+        graphic.beginFill(0xFFFFFF);
+        graphic.drawRect(0, 0, sceneWidth, sceneHeight);
+        graphic.endFill();
+
         handlerOfShapes(animatedShapesArr, 'update');
 
         //console.log(animatedShapesArr);
     }
 
-    window.addEventListener('click', function(event) {
+    /* window.addEventListener('click', function(event) {
         if (event.target.id == 'scene') {
             addShapes(event.x - startXAxis, event.y - startYAxis);
-
-            //console.log(event.x, startXAxis);
         }
         
-    });
+    }); */
 
     increaseGravityBtn.addEventListener('click', function (event) {
         if (gravityValue == 1) descreaseGravityBtn.classList.remove('event-none', 'muted');
