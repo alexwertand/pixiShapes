@@ -80,6 +80,15 @@ function init() {
             }
     });
 
+    var changeStateShapeEvent = new CustomEvent('changeStateShapeEvent', {
+        detail:
+            {
+                generalTypeShape: null,
+                fillColor: null,
+                lineStyleColor: null
+            }
+    });
+
     graphic.click = function (e) {
         shapeClickEvent.detail.x = e.data.global.x;
         shapeClickEvent.detail.y = e.data.global.y;
@@ -103,7 +112,7 @@ function init() {
             BaseShape.call(this, animatedIndex, lineStyleWidth, lineStyleColor, fillColor, x, y);
 
             this.radius = radius || 50;
-            this.parentTypeShape = 'round';
+            this.generalTypeShape = 'Round';
             this.typeShape = 'Circle';
         },
         Ellipse: function (animatedIndex, lineStyleWidth, lineStyleColor, fillColor, x, y, width, height) {
@@ -111,7 +120,7 @@ function init() {
 
             this.width = width || 50;
             this.height = height || 100;
-            this.parentTypeShape = 'round';
+            this.generalTypeShape = 'Round';
             this.typeShape = 'Ellipse';
         },
         Rectangle: function (animatedIndex, lineStyleWidth, lineStyleColor, fillColor, x, y, width, height) {
@@ -119,6 +128,8 @@ function init() {
 
             this.width = width || 100;
             this.height = height || 100;
+            this.generalTypeShape = 'Polygon';
+            this.typeShape = 'Rectangle';
         },
         Triangle: function (animatedIndex, lineStyleWidth, lineStyleColor, fillColor, x, y) {
             BaseShape.call(this, animatedIndex, lineStyleWidth, lineStyleColor, fillColor, x, y);
@@ -127,6 +138,8 @@ function init() {
             this.B_Y = this.y + 100;
             this.C_X = this.x + 75;
             this.C_Y = this.y + 100;
+            this.generalTypeShape = 'Polygon';
+            this.typeShape = 'Triangle';
         },
         Pentagon: function (lineStyleWidth, lineStyleColor, fillColor, x, y) {
             BaseShape.call(this, lineStyleWidth, lineStyleColor, fillColor, x, y);
@@ -139,6 +152,8 @@ function init() {
             this.E_Y = this.y + 50;
             this.D_X = this.E_X;
             this.D_Y = this.E_Y + 100;
+            this.generalTypeShape = 'Polygon';
+            this.typeShape = 'Pentagon';
         },
         Hexagon: function (lineStyleWidth, lineStyleColor, fillColor, x, y) {
             BaseShape.call(this, lineStyleWidth, lineStyleColor, fillColor, x, y);
@@ -155,6 +170,8 @@ function init() {
             this.E_Y = this.y + 70;
             this.F_X = this.x - 15;
             this.F_Y = this.y + 35;
+            this.generalTypeShape = 'Polygon';
+            this.typeShape = 'Hexagon';
         }
     };
 
@@ -166,30 +183,33 @@ function init() {
             return new PIXI.Circle(this.x, this.y, this.radius);
         },
         draw: function () {
-            var circle = new PIXI.Circle(this.x, this.y, this.radius);
             graphic.lineStyle(this.lineStyleWidth, this.lineStyleColor);
             graphic.beginFill(this.fillColor);
             graphic.drawShape(this.initCircle());
-            //graphic.hitArea = circle;
-            //graphic.drawCircle(this.x, this.y, this.radius);
             graphic.endFill();
-
-            //console.log(this.y);
 
             if (!this.triggerShapeEvent) {
                 document.addEventListener('shapeClick', e => {
-                    console.log('shapeClick', this.initCircle().contains(e.detail.x, e.detail.y));
+                    if (this.initCircle().contains(e.detail.x, e.detail.y)) {
+                        animatedShapesArr.splice(this.animatedIndex, 1, null);
 
-                    console.log('circle', this.x, this.y);
+                        changeStateShapeEvent.detail.generalTypeShape = this.generalTypeShape;
+                        changeStateShapeEvent.detail.fillColor = this.fillColor;
+                        changeStateShapeEvent.detail.lineStyleColor = this.lineStyleColor;
 
-                    console.log('event', e.detail.x, e.detail.y);
+                        document.dispatchEvent(changeStateShapeEvent);
+                    }
+                });
+
+                document.addEventListener('changeStateShapeEvent', e => {
+                    if (this.generalTypeShape == e.detail.generalTypeShape) {
+                        this.fillColor = e.detail.fillColor;
+                        this.lineStyleColor = e.detail.lineStyleColor;
+                    }
                 });
 
                 this.triggerShapeEvent = true;
             }
-        },
-        updateRunner: function (time) {
-            console.log('updateRunner');
         },
         update: function() {
             if (this.y > sceneHeight) {
@@ -211,16 +231,26 @@ function init() {
             graphic.lineStyle(this.lineStyleWidth, this.lineStyleColor);
             graphic.beginFill(this.fillColor);
             graphic.drawShape(this.initEllipse());
-            //graphic.drawEllipse(this.x, this.y, this.width, this.height);
             graphic.endFill();
 
             if (!this.triggerShapeEvent) {
                 document.addEventListener('shapeClick', e => {
-                    console.log('shapeClick', this.initEllipse().contains(e.detail.x, e.detail.y));
+                    if (this.initEllipse().contains(e.detail.x, e.detail.y)) {
+                        animatedShapesArr.splice(this.animatedIndex, 1, null);
 
-                    console.log('circle', this.x, this.y);
+                        changeStateShapeEvent.detail.generalTypeShape = this.generalTypeShape;
+                        changeStateShapeEvent.detail.fillColor = this.fillColor;
+                        changeStateShapeEvent.detail.lineStyleColor = this.lineStyleColor;
 
-                    console.log('event', e.detail.x, e.detail.y);
+                        document.dispatchEvent(changeStateShapeEvent);
+                    }
+                });
+
+                document.addEventListener('changeStateShapeEvent', e => {
+                    if (this.generalTypeShape == e.detail.generalTypeShape) {
+                        this.fillColor = e.detail.fillColor;
+                        this.lineStyleColor = e.detail.lineStyleColor;
+                    }
                 });
 
                 this.triggerShapeEvent = true;
@@ -239,24 +269,44 @@ function init() {
 
     Shapes.Rectangle.prototype = {
         constructor: this,
+        initRectangle: function () {
+            return new PIXI.Rectangle(this.x, this.y, this.width, this.height);
+        },
         draw: function () {
             graphic.lineStyle(this.lineStyleWidth, this.lineStyleColor);
             graphic.beginFill(this.fillColor);
-            graphic.drawRect(this.x, this.y, this.width, this.height);
+            graphic.drawShape(this.initRectangle());
             graphic.endFill();
+
+            if (!this.triggerShapeEvent) {
+                document.addEventListener('shapeClick', e => {
+                    if (this.initRectangle().contains(e.detail.x, e.detail.y)) {
+                        animatedShapesArr.splice(this.animatedIndex, 1, null);
+
+                        changeStateShapeEvent.detail.generalTypeShape = this.generalTypeShape;
+                        changeStateShapeEvent.detail.fillColor = this.fillColor;
+                        changeStateShapeEvent.detail.lineStyleColor = this.lineStyleColor;
+
+                        document.dispatchEvent(changeStateShapeEvent);
+                    }
+                });
+
+                document.addEventListener('changeStateShapeEvent', e => {
+                    if (this.generalTypeShape == e.detail.generalTypeShape) {
+                        this.fillColor = e.detail.fillColor;
+                        this.lineStyleColor = e.detail.lineStyleColor;
+                    }
+                });
+
+                this.triggerShapeEvent = true;
+            }
         },
         update: function () {
             if (this.y > sceneHeight) {
                 this.y = -(this.height + this.lineStyleWidth);
-
-                //this.trackArr = [];
             }
 
             this.y += gravityValue;
-
-            //this.trackArr.push(this.y);
-
-            //console.log(this.trackArr);
 
             this.draw();
         },
@@ -264,16 +314,42 @@ function init() {
 
     Shapes.Triangle.prototype = {
         constructor: this,
-        draw: function () {
-            graphic.lineStyle(this.lineStyleWidth, this.lineStyleColor);
-            graphic.beginFill(this.fillColor);
-            graphic.drawPolygon([
+        initTriangle: function () {
+            return new PIXI.Polygon([
                 new PIXI.Point(this.x, this.y),
                 new PIXI.Point(this.B_X, this.B_Y),
                 new PIXI.Point(this.C_X, this.C_Y),
             ]);
+        },
+        draw: function () {
+            graphic.lineStyle(this.lineStyleWidth, this.lineStyleColor);
+            graphic.beginFill(this.fillColor);
+            graphic.drawShape(this.initTriangle());
             graphic.closePath();
             graphic.endFill();
+
+            if (!this.triggerShapeEvent) {
+                document.addEventListener('shapeClick', e => {
+                    if (this.initTriangle().contains(e.detail.x, e.detail.y)) {
+                        animatedShapesArr.splice(this.animatedIndex, 1, null);
+
+                        changeStateShapeEvent.detail.generalTypeShape = this.generalTypeShape;
+                        changeStateShapeEvent.detail.fillColor = this.fillColor;
+                        changeStateShapeEvent.detail.lineStyleColor = this.lineStyleColor;
+
+                        document.dispatchEvent(changeStateShapeEvent);
+                    }
+                });
+
+                document.addEventListener('changeStateShapeEvent', e => {
+                    if (this.generalTypeShape == e.detail.generalTypeShape) {
+                        this.fillColor = e.detail.fillColor;
+                        this.lineStyleColor = e.detail.lineStyleColor;
+                    }
+                });
+
+                this.triggerShapeEvent = true;
+            }
         },
         update: function () {
             if (this.B_Y + this.lineStyleWidth > sceneHeight) {
@@ -292,18 +368,44 @@ function init() {
 
     Shapes.Pentagon.prototype = {
         constructor: this,
-        draw: function () {
-            graphic.lineStyle(this.lineStyleWidth, this.lineStyleColor);
-            graphic.beginFill(this.fillColor);
-            graphic.drawPolygon([
+        initPentagon: function () {
+            return new PIXI.Polygon([
                 new PIXI.Point(this.x, this.y),
                 new PIXI.Point(this.B_X, this.B_Y),
                 new PIXI.Point(this.C_X, this.C_Y),
                 new PIXI.Point(this.D_X, this.D_Y),
                 new PIXI.Point(this.E_X, this.E_Y),
             ]);
+        },
+        draw: function () {
+            graphic.lineStyle(this.lineStyleWidth, this.lineStyleColor);
+            graphic.beginFill(this.fillColor);
+            graphic.drawShape(this.initPentagon());
             graphic.closePath();
             graphic.endFill();
+
+            if (!this.triggerShapeEvent) {
+                document.addEventListener('shapeClick', e => {
+                    if (this.initPentagon().contains(e.detail.x, e.detail.y)) {
+                        animatedShapesArr.splice(this.animatedIndex, 1, null);
+
+                        changeStateShapeEvent.detail.generalTypeShape = this.generalTypeShape;
+                        changeStateShapeEvent.detail.fillColor = this.fillColor;
+                        changeStateShapeEvent.detail.lineStyleColor = this.lineStyleColor;
+
+                        document.dispatchEvent(changeStateShapeEvent);
+                    }
+                });
+
+                document.addEventListener('changeStateShapeEvent', e => {
+                    if (this.generalTypeShape == e.detail.generalTypeShape) {
+                        this.fillColor = e.detail.fillColor;
+                        this.lineStyleColor = e.detail.lineStyleColor;
+                    }
+                });
+
+                this.triggerShapeEvent = true;
+            }
         },
         update: function () {
             if (this.D_Y + this.lineStyleWidth > sceneHeight) {
@@ -326,10 +428,8 @@ function init() {
 
     Shapes.Hexagon.prototype = {
         constructor: this,
-        draw: function () {
-            graphic.lineStyle(this.lineStyleWidth, this.lineStyleColor);
-            graphic.beginFill(this.fillColor);
-            graphic.drawPolygon([
+        initHexagon: function () {
+            return new PIXI.Polygon([
                 new PIXI.Point(this.x, this.y),
                 new PIXI.Point(this.B_X, this.B_Y),
                 new PIXI.Point(this.C_X, this.C_Y),
@@ -337,8 +437,36 @@ function init() {
                 new PIXI.Point(this.E_X, this.E_Y),
                 new PIXI.Point(this.F_X, this.F_Y),
             ]);
+        },
+        draw: function () {
+            graphic.lineStyle(this.lineStyleWidth, this.lineStyleColor);
+            graphic.beginFill(this.fillColor);
+            graphic.drawShape(this.initHexagon());
             graphic.closePath();
             graphic.endFill();
+
+            if (!this.triggerShapeEvent) {
+                document.addEventListener('shapeClick', e => {
+                    if (this.initHexagon().contains(e.detail.x, e.detail.y)) {
+                        animatedShapesArr.splice(this.animatedIndex, 1, null);
+
+                        changeStateShapeEvent.detail.generalTypeShape = this.generalTypeShape;
+                        changeStateShapeEvent.detail.fillColor = this.fillColor;
+                        changeStateShapeEvent.detail.lineStyleColor = this.lineStyleColor;
+
+                        document.dispatchEvent(changeStateShapeEvent);
+                    }
+                });
+
+                document.addEventListener('changeStateShapeEvent', e => {
+                    if (this.generalTypeShape == e.detail.generalTypeShape) {
+                        this.fillColor = e.detail.fillColor;
+                        this.lineStyleColor = e.detail.lineStyleColor;
+                    }
+                });
+
+                this.triggerShapeEvent = true;
+            }
         },
         update: function () {
             if (this.D_Y + this.lineStyleWidth > sceneHeight) {
@@ -374,7 +502,7 @@ function init() {
 
     function handlerOfShapes(arr, methodName) {
         for (var i = 0, len = arr.length; i < len; i++) {
-            arr[i][methodName]();
+            if (arr[i]) arr[i][methodName]();
         }
     }
 
@@ -395,16 +523,9 @@ function init() {
 
     initShapes();
 
-    /* console.log(animatedShapesArr[0]);
-
-    myGame.updateRunner.add(Shapes.Circle);
-
-    myGame.updateRunner.emit(); */
-
     shapesAmountBox.innerText = animatedShapesArr.length;
     
     handlerOfShapes(animatedShapesArr, 'draw');
-    handlerOfShapes([animatedShapesArr[0]], 'updateRunner');
 
     ticker.add(animate);
     ticker.start();
