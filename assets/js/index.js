@@ -26,14 +26,19 @@ function init() {
         return Math.floor(Math.random() * Math.floor(max));
     }
 
-    var scene = document.querySelector('#scene'),
+    var W = window,
+        W_w = W.innerWidth,
+        W_h = W.innerHeight,
+        scene = document.querySelector('#scene'),
         app = new PIXI.Application({
             view: scene,
             antialias: true,
-            backgroundColor: rgb2hex('rgb(255, 255, 255)')
+            backgroundColor: rgb2hex('rgb(255, 255, 255)'),
+            // resizeTo: W
         }),
         graphic = new PIXI.Graphics(),
         ticker = new PIXI.Ticker(),
+        pixiEventEmitter =  new PIXI.utils.EventEmitter();
         decreaseShapesBtn = document.querySelector('#decrease-amount'),
         increaseShapesBtn = document.querySelector('#increase-amount'),
         increaseGravityBtn = document.querySelector('#increase-gravity'),
@@ -44,17 +49,24 @@ function init() {
         sceneHeight = scene.offsetHeight,
         startXAxis = Math.ceil(scene.getBoundingClientRect().left),
         startYAxis = Math.ceil(scene.getBoundingClientRect().top),
-        w = window,
-        w_w = w.innerWidth,
-        w_h = w.innerHeight,
         animatedShapesArr = [],
         gravityValue = 1;
 
-    gravityAmountBox.innerText = gravityValue;
-
     app.stage.addChild(graphic);
 
-    //console.log(sceneWidth, sceneHeight);
+    gravityAmountBox.innerText = gravityValue;
+
+    graphic.interactive = true;
+    graphic.buttonMode = true;
+    
+    graphic.on('click', e => {
+        pixiEventEmitter.emit('clicked', {});
+        console.log('graphic', e);
+    });
+
+    graphic.drawRect(0, 0, 800, 600);
+
+    console.log(graphic);
 
     function position(val) {
         return {
@@ -306,22 +318,22 @@ function init() {
                 2,
                 getRandonColor(),
                 getRandonColor(),
-                (32 + position(sceneWidth - 30 - 30 - 2).x),
-                (32 + position(sceneHeight - 30 - 30 - 2).y),
+                50,
+                50,
                 30),
             new Shapes.Ellipse(
                 2,
                 getRandonColor(),
                 getRandonColor(),
-                (102 + position(sceneWidth - 70 - 70 - 2).x),
-                (32 + position(sceneHeight - 30 - 30 - 2).y),
-                30, 70),
+                200,
+                50,
+                70, 30),
             new Shapes.Rectangle(
                 2,
                 getRandonColor(),
                 getRandonColor(),
-                (2 + position(sceneWidth - 100 - 2).x),
-                (2 + position(sceneHeight - 70 - 2).y),
+                300,
+                50,
                 100, 70),
             new Shapes.Triangle(),
             new Shapes.Pentagon(),
@@ -362,12 +374,16 @@ function init() {
     function animate() {
         graphic.clear();
 
+        graphic.beginFill(0xFFFFFF);
+        graphic.drawShape(new PIXI.Rectangle(0, 0, sceneWidth, sceneHeight));
+        graphic.endFill();
+
         handlerOfShapes(animatedShapesArr, 'update');
 
         //console.log(animatedShapesArr);
     }
 
-    window.addEventListener('click', function(event) {
+    W.addEventListener('click', function(event) {
         if (event.target.id == 'scene') {
             addShapes(event.x - startXAxis, event.y - startYAxis);
 
