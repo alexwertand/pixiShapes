@@ -35,7 +35,7 @@ function init() {
 
     function getRandonColor(alpha) {
         if (alpha) return rgb2hex('rgba(' + getRandomInt(256) + ',' + getRandomInt(256) + ',' + getRandomInt(256) + ',' + alpha + ')');
-        
+
         return rgb2hex('rgb(' + getRandomInt(256) + ',' + getRandomInt(256) + ',' + getRandomInt(256) + ')');
     }
 
@@ -64,7 +64,7 @@ function init() {
         w_h = w.innerHeight,
         animatedShapesArr = [],
         gravityValue = 1;
-    
+
     //app.stage.addChild(graphic);
 
     app.stage.interactiveChildren = true;
@@ -77,19 +77,19 @@ function init() {
 
     var shapeClickEvent = new CustomEvent('shapeClick', {
         detail:
-            {
-                x: null,
-                y: null
-            }
+        {
+            x: null,
+            y: null
+        }
     });
 
     var changeStateShapeEvent = new CustomEvent('changeStateShapeEvent', {
         detail:
-            {
-                typeShape: null,
-                fillColor: null,
-                lineStyleColor: null
-            }
+        {
+            typeShape: null,
+            fillColor: null,
+            lineStyleColor: null
+        }
     });
 
     graphic.click = function (e) {
@@ -203,10 +203,10 @@ function init() {
 
             if (!this.triggerShapeEvent) {
                 document.addEventListener('shapeClick', e => {
-                    
+
                     if (this.initCircle().contains(e.detail.x, e.detail.y)) {
                         console.log('this.initCircle()', true);
-                       // animatedShapesArr.splice(this.animatedIndex, 1, null);
+                        // animatedShapesArr.splice(this.animatedIndex, 1, null);
 
                         changeStateShapeEvent.detail.typeShape = this.typeShape;
                         changeStateShapeEvent.detail.fillColor = this.fillColor;
@@ -214,7 +214,7 @@ function init() {
 
                         document.dispatchEvent(changeStateShapeEvent);
                     } else {
-                        
+
                     }
                 });
 
@@ -228,7 +228,7 @@ function init() {
                 this.triggerShapeEvent = true;
             }
         },
-        update: function() {
+        update: function () {
             if (this.y > sceneHeight) {
                 this.y = -(this.radius + this.lineStyleWidth);
             }
@@ -244,7 +244,7 @@ function init() {
         initEllipse: function () {
             return new PIXI.Ellipse(this.x, this.y, this.width, this.height);
         },
-        draw: function() {
+        draw: function () {
             this.graphic.clear();
             this.graphic.lineStyle(this.lineStyleWidth, this.lineStyleColor);
             this.graphic.beginFill(this.fillColor);
@@ -553,7 +553,7 @@ function init() {
     console.log('app.stage', app.stage.children[3].zIndex);
 
     shapesAmountBox.innerText = animatedShapesArr.length;
-    
+
     handlerOfShapes(animatedShapesArr, 'draw');
 
     ticker.add(animate);
