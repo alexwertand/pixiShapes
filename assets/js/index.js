@@ -65,12 +65,15 @@ function init() {
         animatedShapesArr = [],
         gravityValue = 1;
     
-    app.stage.addChild(graphic);
+    //app.stage.addChild(graphic);
+
+    app.stage.interactiveChildren = true;
+    app.stage.sortableChildren = true;
 
     gravityAmountBox.innerText = gravityValue;
 
-    graphic.interactive = true;
-    graphic.buttonMode = true;
+    /* graphic.interactive = true;
+    graphic.buttonMode = true; */
 
     var shapeClickEvent = new CustomEvent('shapeClick', {
         detail:
@@ -105,6 +108,20 @@ function init() {
         this.y = y || 100;
         this.animatedIndex = animatedIndex;
         this.triggerShapeEvent = false;
+
+        this.graphic = new PIXI.Graphics();
+        this.graphic.zIndex = this.animatedIndex;
+        app.stage.addChild(this.graphic);
+        this.graphic.interactive = true;
+        this.graphic.buttonMode = true;
+
+        this.graphic.click = function (e) {
+            shapeClickEvent.detail.x = e.data.global.x;
+            shapeClickEvent.detail.y = e.data.global.y;
+            document.dispatchEvent(shapeClickEvent);
+
+            //console.log(e);
+        };
     }
 
     var Shapes = {
@@ -113,6 +130,7 @@ function init() {
 
             this.radius = radius || 50;
             this.typeShape = 'Circle';
+            //this.circle = new PIXI.Circle(this.x, this.y, this.radius);
         },
         Ellipse: function (animatedIndex, lineStyleWidth, lineStyleColor, fillColor, x, y, width, height) {
             BaseShape.call(this, animatedIndex, lineStyleWidth, lineStyleColor, fillColor, x, y);
@@ -177,21 +195,26 @@ function init() {
             return new PIXI.Circle(this.x, this.y, this.radius);
         },
         draw: function () {
-            graphic.lineStyle(this.lineStyleWidth, this.lineStyleColor);
-            graphic.beginFill(this.fillColor);
-            graphic.drawShape(this.initCircle());
-            graphic.endFill();
+            this.graphic.clear();
+            this.graphic.lineStyle(this.lineStyleWidth, this.lineStyleColor);
+            this.graphic.beginFill(this.fillColor);
+            this.graphic.drawShape(this.initCircle());
+            this.graphic.endFill();
 
             if (!this.triggerShapeEvent) {
                 document.addEventListener('shapeClick', e => {
+                    
                     if (this.initCircle().contains(e.detail.x, e.detail.y)) {
-                        animatedShapesArr.splice(this.animatedIndex, 1, null);
+                        console.log('this.initCircle()', true);
+                       // animatedShapesArr.splice(this.animatedIndex, 1, null);
 
                         changeStateShapeEvent.detail.typeShape = this.typeShape;
                         changeStateShapeEvent.detail.fillColor = this.fillColor;
                         changeStateShapeEvent.detail.lineStyleColor = this.lineStyleColor;
 
                         document.dispatchEvent(changeStateShapeEvent);
+                    } else {
+                        
                     }
                 });
 
@@ -222,15 +245,17 @@ function init() {
             return new PIXI.Ellipse(this.x, this.y, this.width, this.height);
         },
         draw: function() {
-            graphic.lineStyle(this.lineStyleWidth, this.lineStyleColor);
-            graphic.beginFill(this.fillColor);
-            graphic.drawShape(this.initEllipse());
-            graphic.endFill();
+            this.graphic.clear();
+            this.graphic.lineStyle(this.lineStyleWidth, this.lineStyleColor);
+            this.graphic.beginFill(this.fillColor);
+            this.graphic.drawShape(this.initEllipse());
+            this.graphic.endFill();
 
             if (!this.triggerShapeEvent) {
                 document.addEventListener('shapeClick', e => {
                     if (this.initEllipse().contains(e.detail.x, e.detail.y)) {
-                        animatedShapesArr.splice(this.animatedIndex, 1, null);
+                        console.log('this.initEllipse()', true);
+                        //animatedShapesArr.splice(this.animatedIndex, 1, null);
 
                         changeStateShapeEvent.detail.typeShape = this.typeShape;
                         changeStateShapeEvent.detail.fillColor = this.fillColor;
@@ -267,16 +292,17 @@ function init() {
             return new PIXI.Rectangle(this.x, this.y, this.width, this.height);
         },
         draw: function () {
-            graphic.lineStyle(this.lineStyleWidth, this.lineStyleColor);
-            graphic.beginFill(this.fillColor);
-            graphic.drawShape(this.initRectangle());
-            graphic.endFill();
+            this.graphic.clear();
+            this.graphic.lineStyle(this.lineStyleWidth, this.lineStyleColor);
+            this.graphic.beginFill(this.fillColor);
+            this.graphic.drawShape(this.initRectangle());
+            this.graphic.endFill();
 
             if (!this.triggerShapeEvent) {
                 document.addEventListener('shapeClick', e => {
                     if (this.initRectangle().contains(e.detail.x, e.detail.y)) {
-                        animatedShapesArr.splice(this.animatedIndex, 1, null);
-
+                        console.log('this.initRectangle()', true);
+                        //animatedShapesArr.splice(this.animatedIndex, 1, null);
                         changeStateShapeEvent.detail.typeShape = this.typeShape;
                         changeStateShapeEvent.detail.fillColor = this.fillColor;
                         changeStateShapeEvent.detail.lineStyleColor = this.lineStyleColor;
@@ -316,16 +342,18 @@ function init() {
             ]);
         },
         draw: function () {
-            graphic.lineStyle(this.lineStyleWidth, this.lineStyleColor);
-            graphic.beginFill(this.fillColor);
-            graphic.drawShape(this.initTriangle());
-            graphic.closePath();
-            graphic.endFill();
+            this.graphic.clear();
+            this.graphic.lineStyle(this.lineStyleWidth, this.lineStyleColor);
+            this.graphic.beginFill(this.fillColor);
+            this.graphic.drawShape(this.initTriangle());
+            this.graphic.closePath();
+            this.graphic.endFill();
 
             if (!this.triggerShapeEvent) {
                 document.addEventListener('shapeClick', e => {
                     if (this.initTriangle().contains(e.detail.x, e.detail.y)) {
-                        animatedShapesArr.splice(this.animatedIndex, 1, null);
+                        console.log('this.initTriangle()', true);
+                        //animatedShapesArr.splice(this.animatedIndex, 1, null);
 
                         changeStateShapeEvent.detail.typeShape = this.typeShape;
                         changeStateShapeEvent.detail.fillColor = this.fillColor;
@@ -372,16 +400,18 @@ function init() {
             ]);
         },
         draw: function () {
-            graphic.lineStyle(this.lineStyleWidth, this.lineStyleColor);
-            graphic.beginFill(this.fillColor);
-            graphic.drawShape(this.initPentagon());
-            graphic.closePath();
-            graphic.endFill();
+            this.graphic.clear();
+            this.graphic.lineStyle(this.lineStyleWidth, this.lineStyleColor);
+            this.graphic.beginFill(this.fillColor);
+            this.graphic.drawShape(this.initPentagon());
+            this.graphic.closePath();
+            this.graphic.endFill();
 
             if (!this.triggerShapeEvent) {
                 document.addEventListener('shapeClick', e => {
                     if (this.initPentagon().contains(e.detail.x, e.detail.y)) {
-                        animatedShapesArr.splice(this.animatedIndex, 1, null);
+                        console.log('this.initPentagon()', true);
+                        //animatedShapesArr.splice(this.animatedIndex, 1, null);
 
                         changeStateShapeEvent.detail.typeShape = this.typeShape;
                         changeStateShapeEvent.detail.fillColor = this.fillColor;
@@ -433,16 +463,18 @@ function init() {
             ]);
         },
         draw: function () {
-            graphic.lineStyle(this.lineStyleWidth, this.lineStyleColor);
-            graphic.beginFill(this.fillColor);
-            graphic.drawShape(this.initHexagon());
-            graphic.closePath();
-            graphic.endFill();
+            this.graphic.clear();
+            this.graphic.lineStyle(this.lineStyleWidth, this.lineStyleColor);
+            this.graphic.beginFill(this.fillColor);
+            this.graphic.drawShape(this.initHexagon());
+            this.graphic.closePath();
+            this.graphic.endFill();
 
             if (!this.triggerShapeEvent) {
                 document.addEventListener('shapeClick', e => {
                     if (this.initHexagon().contains(e.detail.x, e.detail.y)) {
-                        animatedShapesArr.splice(this.animatedIndex, 1, null);
+                        console.log('this.initHexagon()', true);
+                        //animatedShapesArr.splice(this.animatedIndex, 1, null);
 
                         changeStateShapeEvent.detail.typeShape = this.typeShape;
                         changeStateShapeEvent.detail.fillColor = this.fillColor;
@@ -502,7 +534,7 @@ function init() {
 
     function addShapes(x, y) {
 
-        console.log(x, y);
+        //console.log(x, y);
 
         var randomShape = new typeShapesArr[getRandomInt(typeShapesArr.length)](animatedShapesArr.length, 2, getRandonColor(), getRandonColor(), x, y);
 
@@ -516,6 +548,9 @@ function init() {
     }
 
     initShapes();
+
+
+    console.log('app.stage', app.stage.children[3].zIndex);
 
     shapesAmountBox.innerText = animatedShapesArr.length;
     
