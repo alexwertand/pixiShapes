@@ -83,7 +83,7 @@ function init() {
     var changeStateShapeEvent = new CustomEvent('changeStateShapeEvent', {
         detail:
             {
-                generalTypeShape: null,
+                typeShape: null,
                 fillColor: null,
                 lineStyleColor: null
             }
@@ -112,7 +112,6 @@ function init() {
             BaseShape.call(this, animatedIndex, lineStyleWidth, lineStyleColor, fillColor, x, y);
 
             this.radius = radius || 50;
-            this.generalTypeShape = 'Round';
             this.typeShape = 'Circle';
         },
         Ellipse: function (animatedIndex, lineStyleWidth, lineStyleColor, fillColor, x, y, width, height) {
@@ -120,7 +119,6 @@ function init() {
 
             this.width = width || 50;
             this.height = height || 100;
-            this.generalTypeShape = 'Round';
             this.typeShape = 'Ellipse';
         },
         Rectangle: function (animatedIndex, lineStyleWidth, lineStyleColor, fillColor, x, y, width, height) {
@@ -128,7 +126,6 @@ function init() {
 
             this.width = width || 100;
             this.height = height || 100;
-            this.generalTypeShape = 'Polygon';
             this.typeShape = 'Rectangle';
         },
         Triangle: function (animatedIndex, lineStyleWidth, lineStyleColor, fillColor, x, y) {
@@ -138,11 +135,10 @@ function init() {
             this.B_Y = this.y + 100;
             this.C_X = this.x + 75;
             this.C_Y = this.y + 100;
-            this.generalTypeShape = 'Polygon';
             this.typeShape = 'Triangle';
         },
-        Pentagon: function (lineStyleWidth, lineStyleColor, fillColor, x, y) {
-            BaseShape.call(this, lineStyleWidth, lineStyleColor, fillColor, x, y);
+        Pentagon: function (animatedIndex, lineStyleWidth, lineStyleColor, fillColor, x, y) {
+            BaseShape.call(this, animatedIndex, lineStyleWidth, lineStyleColor, fillColor, x, y);
 
             this.B_X = this.x + 50;
             this.B_Y = this.y + 50;
@@ -152,11 +148,10 @@ function init() {
             this.E_Y = this.y + 50;
             this.D_X = this.E_X;
             this.D_Y = this.E_Y + 100;
-            this.generalTypeShape = 'Polygon';
             this.typeShape = 'Pentagon';
         },
-        Hexagon: function (lineStyleWidth, lineStyleColor, fillColor, x, y) {
-            BaseShape.call(this, lineStyleWidth, lineStyleColor, fillColor, x, y);
+        Hexagon: function (animatedIndex, lineStyleWidth, lineStyleColor, fillColor, x, y) {
+            BaseShape.call(this, animatedIndex, lineStyleWidth, lineStyleColor, fillColor, x, y);
 
             //this.height = 70
 
@@ -170,7 +165,6 @@ function init() {
             this.E_Y = this.y + 70;
             this.F_X = this.x - 15;
             this.F_Y = this.y + 35;
-            this.generalTypeShape = 'Polygon';
             this.typeShape = 'Hexagon';
         }
     };
@@ -193,7 +187,7 @@ function init() {
                     if (this.initCircle().contains(e.detail.x, e.detail.y)) {
                         animatedShapesArr.splice(this.animatedIndex, 1, null);
 
-                        changeStateShapeEvent.detail.generalTypeShape = this.generalTypeShape;
+                        changeStateShapeEvent.detail.typeShape = this.typeShape;
                         changeStateShapeEvent.detail.fillColor = this.fillColor;
                         changeStateShapeEvent.detail.lineStyleColor = this.lineStyleColor;
 
@@ -202,7 +196,7 @@ function init() {
                 });
 
                 document.addEventListener('changeStateShapeEvent', e => {
-                    if (this.generalTypeShape == e.detail.generalTypeShape) {
+                    if (this.typeShape == e.detail.typeShape) {
                         this.fillColor = e.detail.fillColor;
                         this.lineStyleColor = e.detail.lineStyleColor;
                     }
@@ -238,7 +232,7 @@ function init() {
                     if (this.initEllipse().contains(e.detail.x, e.detail.y)) {
                         animatedShapesArr.splice(this.animatedIndex, 1, null);
 
-                        changeStateShapeEvent.detail.generalTypeShape = this.generalTypeShape;
+                        changeStateShapeEvent.detail.typeShape = this.typeShape;
                         changeStateShapeEvent.detail.fillColor = this.fillColor;
                         changeStateShapeEvent.detail.lineStyleColor = this.lineStyleColor;
 
@@ -247,7 +241,7 @@ function init() {
                 });
 
                 document.addEventListener('changeStateShapeEvent', e => {
-                    if (this.generalTypeShape == e.detail.generalTypeShape) {
+                    if (this.typeShape == e.detail.typeShape) {
                         this.fillColor = e.detail.fillColor;
                         this.lineStyleColor = e.detail.lineStyleColor;
                     }
@@ -283,7 +277,7 @@ function init() {
                     if (this.initRectangle().contains(e.detail.x, e.detail.y)) {
                         animatedShapesArr.splice(this.animatedIndex, 1, null);
 
-                        changeStateShapeEvent.detail.generalTypeShape = this.generalTypeShape;
+                        changeStateShapeEvent.detail.typeShape = this.typeShape;
                         changeStateShapeEvent.detail.fillColor = this.fillColor;
                         changeStateShapeEvent.detail.lineStyleColor = this.lineStyleColor;
 
@@ -292,7 +286,7 @@ function init() {
                 });
 
                 document.addEventListener('changeStateShapeEvent', e => {
-                    if (this.generalTypeShape == e.detail.generalTypeShape) {
+                    if (this.typeShape == e.detail.typeShape) {
                         this.fillColor = e.detail.fillColor;
                         this.lineStyleColor = e.detail.lineStyleColor;
                     }
@@ -333,7 +327,7 @@ function init() {
                     if (this.initTriangle().contains(e.detail.x, e.detail.y)) {
                         animatedShapesArr.splice(this.animatedIndex, 1, null);
 
-                        changeStateShapeEvent.detail.generalTypeShape = this.generalTypeShape;
+                        changeStateShapeEvent.detail.typeShape = this.typeShape;
                         changeStateShapeEvent.detail.fillColor = this.fillColor;
                         changeStateShapeEvent.detail.lineStyleColor = this.lineStyleColor;
 
@@ -342,7 +336,7 @@ function init() {
                 });
 
                 document.addEventListener('changeStateShapeEvent', e => {
-                    if (this.generalTypeShape == e.detail.generalTypeShape) {
+                    if (this.typeShape == e.detail.typeShape) {
                         this.fillColor = e.detail.fillColor;
                         this.lineStyleColor = e.detail.lineStyleColor;
                     }
@@ -389,7 +383,7 @@ function init() {
                     if (this.initPentagon().contains(e.detail.x, e.detail.y)) {
                         animatedShapesArr.splice(this.animatedIndex, 1, null);
 
-                        changeStateShapeEvent.detail.generalTypeShape = this.generalTypeShape;
+                        changeStateShapeEvent.detail.typeShape = this.typeShape;
                         changeStateShapeEvent.detail.fillColor = this.fillColor;
                         changeStateShapeEvent.detail.lineStyleColor = this.lineStyleColor;
 
@@ -398,7 +392,7 @@ function init() {
                 });
 
                 document.addEventListener('changeStateShapeEvent', e => {
-                    if (this.generalTypeShape == e.detail.generalTypeShape) {
+                    if (this.typeShape == e.detail.typeShape) {
                         this.fillColor = e.detail.fillColor;
                         this.lineStyleColor = e.detail.lineStyleColor;
                     }
@@ -450,7 +444,7 @@ function init() {
                     if (this.initHexagon().contains(e.detail.x, e.detail.y)) {
                         animatedShapesArr.splice(this.animatedIndex, 1, null);
 
-                        changeStateShapeEvent.detail.generalTypeShape = this.generalTypeShape;
+                        changeStateShapeEvent.detail.typeShape = this.typeShape;
                         changeStateShapeEvent.detail.fillColor = this.fillColor;
                         changeStateShapeEvent.detail.lineStyleColor = this.lineStyleColor;
 
@@ -459,7 +453,7 @@ function init() {
                 });
 
                 document.addEventListener('changeStateShapeEvent', e => {
-                    if (this.generalTypeShape == e.detail.generalTypeShape) {
+                    if (this.typeShape == e.detail.typeShape) {
                         this.fillColor = e.detail.fillColor;
                         this.lineStyleColor = e.detail.lineStyleColor;
                     }
@@ -493,10 +487,10 @@ function init() {
         animatedShapesArr = [
             new Shapes.Circle(0, 2, getRandonColor(), getRandonColor(), 50, 50, 30),
             new Shapes.Ellipse(1, 2, getRandonColor(), getRandonColor(), 200, 50, 70, 30),
-            new Shapes.Rectangle(2, 2, getRandonColor(), getRandonColor(), 300, 100, 100, 70),
+            new Shapes.Rectangle(2, 2, getRandonColor(), getRandonColor(), 200, 30, 100, 70),
             new Shapes.Triangle(3, 2, getRandonColor(), getRandonColor(), 200, 200),
-            new Shapes.Pentagon(),
-            new Shapes.Hexagon(),
+            new Shapes.Pentagon(4),
+            new Shapes.Hexagon(5),
         ];
     }
 
